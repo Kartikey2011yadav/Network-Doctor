@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.network_doctor.ui.common.BottomNavigationBar
 import com.example.network_doctor.ui.diagnostics.DiagnosticsScreen
+import com.example.network_doctor.ui.devices.ConnectedDevicesScreen
 import com.example.network_doctor.ui.speedtest.SpeedTestScreen
 import com.example.network_doctor.ui.theme.NetworkDoctorTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,8 +41,9 @@ class MainActivity : ComponentActivity() {
                         composable("diagnostics") {
                             DiagnosticsScreen()
                         }
-                        // Placeholders for other routes
-                        composable("connected_devices") { }
+                        composable("connected_devices") {
+                             ConnectedDevicesScreen()
+                        }
                         composable("tools") { }
                     }
                 }

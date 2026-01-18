@@ -15,18 +15,18 @@ This roadmap outlines the milestones to transform the concept into a professiona
 
 **Goal**: Implement accurate and reliable speed testing.
 
-- [ ] Implement `SpeedTestManager` (Download/Upload/Ping).
-- [ ] Integrate with low-latency test server nodes (or NDT/Librespeed).
-- [ ] Develop the "Futuristic Gauge" UI component with smooth animations.
-- [ ] Implement real-time graph rendering for speed stability.
-- [ ] Connect Engine to UI (ViewModel StateFlow).
+- [x] Implement `SpeedTestManager` (Download/Upload/Ping).
+- [x] Integrate with low-latency test server nodes (or NDT/Librespeed).
+- [x] Develop the "Futuristic Gauge" UI component with smooth animations.
+- [x] Implement real-time graph rendering for speed stability.
+- [x] Connect Engine to UI (ViewModel StateFlow).
 
 ## Phase 3: Diagnostics & Data Layers
 
 **Goal**: Fetch and display deep network insights.
 
-- [ ] Implement `DiagnosticsRepository` for Wifi/Mobile signal stats.
-- [ ] Fetch IP details (External IP API), Gateway, DNS, MAC.
+- [x] Implement `DiagnosticsRepository` for Wifi/Mobile signal stats.
+- [x] Fetch IP details (External IP API), Gateway, DNS, MAC.
 - [ ] Implement Room Database for storing Result History.
 - [ ] Create History Screen with list/detail views of past tests.
 - [ ] Add Permissions handling (Location, Phone State).
@@ -36,7 +36,7 @@ This roadmap outlines the milestones to transform the concept into a professiona
 **Goal**: Add power-user features.
 
 - [ ] **Wi-Fi Analyzer**: Canvas-based channel graph implementation.
-- [ ] **Device Scanner**: ARP/Ping sweep implementation to list connected devices.
+- [x] **Device Scanner**: ARP/Ping sweep implementation to list connected devices.
 - [ ] **Data Usage**: `NetworkStatsManager` integration for per-app usage.
 - [ ] **Network Boost**: Logic for Wifi reset/refresh actions.
 

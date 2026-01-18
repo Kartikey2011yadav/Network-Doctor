@@ -14,6 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.network_doctor.ui.common.BottomNavigationBar
 import com.example.network_doctor.ui.diagnostics.DiagnosticsScreen
 import com.example.network_doctor.ui.devices.ConnectedDevicesScreen
+import com.example.network_doctor.ui.history.HistoryScreen
+import com.example.network_doctor.ui.profile.ProfileScreen
 import com.example.network_doctor.ui.speedtest.SpeedTestScreen
 import com.example.network_doctor.ui.theme.NetworkDoctorTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,7 +46,12 @@ class MainActivity : ComponentActivity() {
                         composable("connected_devices") {
                              ConnectedDevicesScreen()
                         }
-                        composable("tools") { }
+                        composable("history") {
+                            HistoryScreen()
+                        }
+                        composable("profile") {
+                            ProfileScreen()
+                        }
                     }
                 }
             }

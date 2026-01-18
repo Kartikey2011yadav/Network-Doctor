@@ -1,6 +1,7 @@
 package com.example.network_doctor.data.repository
 
 import android.util.Log
+import com.example.network_doctor.data.local.dao.ResultDao
 import com.example.network_doctor.domain.model.SpeedTestResult
 import com.example.network_doctor.domain.model.TestStage
 import com.example.network_doctor.domain.repository.SpeedTestRepository
@@ -16,7 +17,8 @@ import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
 class SpeedTestRepositoryImpl @Inject constructor(
-    private val okHttpClient: OkHttpClient
+    private val okHttpClient: OkHttpClient,
+    private val resultDao: com.example.network_doctor.data.local.dao.ResultDao
 ) : SpeedTestRepository {
 
     private val TEST_FILE_URL = "https://proof.ovh.net/files/10Mb.dat" // Reliable HTTPS source
@@ -90,6 +92,23 @@ class SpeedTestRepositoryImpl @Inject constructor(
                     progress = 1f
                 )
             )
+
+            // Save Result to DB
+            try {
+                resultDao.insertResult(
+                    com.example.network_doctor.data.local.entity.TestResultEntity(
+                        timestamp = System.currentTimeMillis(),
+                        downloadSpeed = finalSpeedMbps,
+                        uploadSpeed = 0f, // Upload not implemented
+                        ping = ping.toFloat(),
+                        jitter = 0f,
+                        loss = 0f,
+                        networkType = "WiFi" // Placeholder
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e("SpeedTest", "Failed to save result", e)
+            }
 
         } catch (e: Exception) {
             Log.e("SpeedTest", "Error", e)

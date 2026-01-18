@@ -18,10 +18,11 @@ import com.example.network_doctor.ui.theme.Pink
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
-        NavigationItem("diagnostics", R.drawable.wifi),
-        NavigationItem("connected_devices", R.drawable.person),
         NavigationItem("speed_test", R.drawable.speed),
-        NavigationItem("tools", R.drawable.settings)
+        NavigationItem("diagnostics", R.drawable.wifi),
+        NavigationItem("connected_devices", R.drawable.person), // Using Person for devices (User's network)
+        NavigationItem("history", R.drawable.settings), // Placeholder if no explicit history icon
+        NavigationItem("profile", R.drawable.settings) 
     )
     
     val navBackStackEntry by navController.currentBackStackEntryAsState()

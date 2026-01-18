@@ -27,8 +27,8 @@ This roadmap outlines the milestones to transform the concept into a professiona
 
 - [x] Implement `DiagnosticsRepository` for Wifi/Mobile signal stats.
 - [x] Fetch IP details (External IP API), Gateway, DNS, MAC.
-- [ ] Implement Room Database for storing Result History.
-- [ ] Create History Screen with list/detail views of past tests.
+- [x] Implement Room Database for storing Result History.
+- [x] Create History Screen with list/detail views of past tests.
 - [ ] Add Permissions handling (Location, Phone State).
 
 ## Phase 4: Advanced Tools & Analysis
@@ -45,7 +45,7 @@ This roadmap outlines the milestones to transform the concept into a professiona
 **Goal**: Final UX refinements and production readiness.
 
 - [ ] Premium Feature gating (Paywall UI).
-- [ ] Settings (Units, Default Server, Theme toggle).
+- [x] Settings (Units, Default Server, Theme toggle).
 - [ ] Feedback/Rating flow.
 - [ ] Battery & Performance optimization.
 - [ ] Final comprehensive testing (Unit & UI Tests).

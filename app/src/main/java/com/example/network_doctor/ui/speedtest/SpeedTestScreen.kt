@@ -6,7 +6,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -64,42 +68,20 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-
-suspend fun startAnimation(animation: Animatable<Float, AnimationVector1D>) {
-    animation.animateTo(0.84f, keyframes {
-        durationMillis = 9000
-        0f at 0 using CubicBezierEasing(0f, 1.5f, 0.8f, 1f)
-        0.72f at 1000 using CubicBezierEasing(0.2f, -1.5f, 0f, 1f)
-        0.76f at 2000 using CubicBezierEasing(0.2f, -2f, 0f, 1f)
-        0.78f at 3000 using CubicBezierEasing(0.2f, -1.5f, 0f, 1f)
-        0.82f at 4000 using CubicBezierEasing(0.2f, -2f, 0f, 1f)
-        0.85f at 5000 using CubicBezierEasing(0.2f, -2f, 0f, 1f)
-        0.89f at 6000 using CubicBezierEasing(0.2f, -1.2f, 0f, 1f)
-        0.82f at 7500 using LinearOutSlowInEasing
-    })
-}
-
-fun Animatable<Float, AnimationVector1D>.toUiState(maxSpeed: Float) = UiState(
-    arcValue = value,
-    speed = "%.1f".format(value * 100),
-    ping = if (value > 0.2f) "${(value * 15).roundToInt()} ms" else "-",
-    maxSpeed = if (maxSpeed > 0f) "%.1f mbps".format(maxSpeed) else "-",
-    inProgress = isRunning
-)
-
 @Composable
-fun SpeedTestScreen() {
-    val coroutineScope = rememberCoroutineScope()
+fun SpeedTestScreen(
+    viewModel: SpeedTestViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+    
+    // Smooth out arc value animation
+    val animatedArcValue by animateFloatAsState(
+        targetValue = state.arcValue,
+        animationSpec = tween(durationMillis = 500)
+    )
 
-    val animation = remember { Animatable(0f) }
-    val maxSpeed = remember { mutableFloatStateOf(0f) }
-    maxSpeed.floatValue = max(maxSpeed.floatValue, animation.value * 100f)
-
-    SpeedTestScreen(animation.toUiState(maxSpeed.floatValue)) {
-        coroutineScope.launch {
-            maxSpeed.floatValue = 0f
-            startAnimation(animation)
-        }
+    SpeedTestScreen(state.copy(arcValue = animatedArcValue)) {
+        viewModel.toggleTest()
     }
 }
 
@@ -114,8 +96,8 @@ private fun SpeedTestScreen(state: UiState, onClick: () -> Unit) {
     ) {
         Header()
         SpeedIndicator(state = state, onClick = onClick)
-        AdditionalInfo(state.ping, state.maxSpeed)
-        NavigationView()
+        LineGraph(state.graphData)
+        AdditionalInfo(state.downloadSpeed, state.uploadSpeed, state.ping)
     }
 }
 
@@ -137,19 +119,19 @@ fun SpeedIndicator(state: UiState, onClick: () -> Unit) {
             .aspectRatio(1f)
     ) {
         CircularSpeedIndicator(state.arcValue, 240f)
-        StartButton(!state.inProgress, onClick)
-        SpeedValue(state.speed)
+        StartButton(state.inProgress, onClick)
+        SpeedValue(state.speed, state.stageName)
     }
 }
 
 @Composable
-fun SpeedValue(value: String) {
+fun SpeedValue(value: String, stage: String) {
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("DOWNLOAD", style = MaterialTheme.typography.labelSmall)
+        Text(if (stage.isNotEmpty()) stage else "DOWNLOAD", style = MaterialTheme.typography.labelSmall)
         Text(
             text = value,
             fontSize = 45.sp,
@@ -161,17 +143,16 @@ fun SpeedValue(value: String) {
 }
 
 @Composable
-fun StartButton(isEnabled: Boolean, onClick: () -> Unit) {
+fun StartButton(inProgress: Boolean, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier.padding(bottom = 24.dp),
-        enabled = isEnabled,
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.onSurface),
 
         ) {
         Text(
-            text = "START",
+            text = if (inProgress) "STOP" else "START",
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -179,7 +160,41 @@ fun StartButton(isEnabled: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun AdditionalInfo(ping: String, maxSpeed: String) {
+fun LineGraph(data: List<Float>) {
+    // If no data, just show empty space or flat line
+    if (data.isEmpty()) {
+       Box(modifier = Modifier.fillMaxWidth().height(100.dp))
+       return
+    }
+
+    val pathColor = Green500
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(horizontal = 32.dp)
+    ) {
+        val width = size.width
+        val height = size.height
+        val stepX = width / (data.size - 1).coerceAtLeast(1)
+
+        val path = androidx.compose.ui.graphics.Path()
+        data.forEachIndexed { index, value ->
+            val x = index * stepX
+            val y = height - (value * height)
+            if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+
+        drawPath(
+            path = path,
+            color = pathColor,
+            style = Stroke(width = 4f, cap = StrokeCap.Round)
+        )
+    }
+}
+
+@Composable
+fun AdditionalInfo(download: String, upload: String, ping: String) {
 
     @Composable
     fun RowScope.InfoColumn(title: String, value: String) {
@@ -187,10 +202,11 @@ fun AdditionalInfo(ping: String, maxSpeed: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f)
         ) {
-            Text(title)
+            Text(title, color = Color.Gray, fontSize = 12.sp)
             Text(
                 value,
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
@@ -200,10 +216,13 @@ fun AdditionalInfo(ping: String, maxSpeed: String) {
         Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
+            .padding(horizontal = 16.dp)
     ) {
-        InfoColumn(title = "PING", value = ping)
+        InfoColumn(title = "DOWNLOAD", value = download)
         VerticalDivider()
-        InfoColumn(title = "MAX SPEED", value = maxSpeed)
+        InfoColumn(title = "UPLOAD", value = upload)
+        VerticalDivider()
+        InfoColumn(title = "PING", value = ping)
     }
 }
 

@@ -6,10 +6,10 @@ This roadmap outlines the milestones to transform the concept into a professiona
 
 **Goal**: Establish architecture and build the premium "Dark Mode" UI skeleton.
 
-- [ ] Initialize Android Project with Jetpack Compose & Hilt.
-- [ ] Implement Design System (Colors, Typography, Themes) matching the provided UI.
-- [ ] Build Navigation Graph (Bottom Navigation: Speed, History, Data, Tools).
-- [ ] Create basic Skeleton Screens for Speed Test and Dashboard.
+- [x] Initialize Android Project with Jetpack Compose & Hilt.
+- [x] Implement Design System (Colors, Typography, Themes) matching the provided UI.
+- [x] Build Navigation Graph (Bottom Navigation: Speed, History, Data, Tools).
+- [x] Create basic Skeleton Screens for Speed Test and Dashboard.
 
 ## Phase 2: Core Speed Test Engine
 

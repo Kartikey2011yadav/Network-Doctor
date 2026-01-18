@@ -19,7 +19,7 @@ class SpeedTestRepositoryImpl @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) : SpeedTestRepository {
 
-    private val TEST_FILE_URL = "http://speedtest.tele2.net/100MB.zip" // Public speed test file
+    private val TEST_FILE_URL = "https://proof.ovh.net/files/10Mb.dat" // Reliable HTTPS source
     private val PING_URL = "http://clients3.google.com/generate_204"
 
     override fun startSpeedTest(): Flow<SpeedTestResult> = flow {
@@ -40,25 +40,29 @@ class SpeedTestRepositoryImpl @Inject constructor(
 
             val body = response.body ?: throw IOException("Empty body")
             val inputStream = body.byteStream()
-            val buffer = ByteArray(8192)
+            val buffer = ByteArray(16384) // 16KB buffer
             var bytesRead: Int
             var totalBytesRead = 0L
             val startTime = System.currentTimeMillis()
             var lastUpdate = 0L
 
-            // We limit the test to 10 seconds or full file
+            // We limit the test to 15 seconds to ensure enough data for reliable speed
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                 totalBytesRead += bytesRead
                 val currentTime = System.currentTimeMillis()
                 val duration = currentTime - startTime
                 
-                if (duration > 10000) break // Stop after 10s
+                if (duration > 15000) break 
 
                 // Update UI every ~100ms
                 if (currentTime - lastUpdate > 100) {
-                    val speedBps = (totalBytesRead * 8 * 1000) / maxOf(1, duration)
-                    val speedMbps = speedBps / 1_000_000f
-                    val progress = (duration / 10000f).coerceIn(0f, 1f)
+                    // Use Double for calculation to avoid overflow/truncation
+                    val timeSeconds = maxOf(1L, duration) / 1000.0
+                    val bits = totalBytesRead * 8.0
+                    val speedBps = bits / timeSeconds
+                    val speedMbps = (speedBps / 1_000_000.0).toFloat()
+                    
+                    val progress = (duration / 15000f).coerceIn(0f, 1f)
 
                     emit(
                         SpeedTestResult(
@@ -74,9 +78,9 @@ class SpeedTestRepositoryImpl @Inject constructor(
             body.close()
             
             // Final Download Result
-            val totalDuration = System.currentTimeMillis() - startTime
-            val finalSpeedBps = (totalBytesRead * 8 * 1000) / maxOf(1, totalDuration)
-            val finalSpeedMbps = finalSpeedBps / 1_000_000f
+            val totalDuration = maxOf(1L, System.currentTimeMillis() - startTime)
+            val finalBits = totalBytesRead * 8.0
+            val finalSpeedMbps = (finalBits / (totalDuration / 1000.0) / 1_000_000.0).toFloat()
             
             emit(
                 SpeedTestResult(

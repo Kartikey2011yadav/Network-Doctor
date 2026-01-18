@@ -1,4 +1,4 @@
-package com.example.network_doctor
+package com.example.network_doctor.ui.speedtest
 
 class UiState(
     val speed: String = "",

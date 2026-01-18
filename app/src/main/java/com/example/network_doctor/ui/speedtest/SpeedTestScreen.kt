@@ -1,4 +1,6 @@
-package com.example.network_doctor
+package com.example.network_doctor.ui.speedtest
+
+import com.example.network_doctor.R
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
